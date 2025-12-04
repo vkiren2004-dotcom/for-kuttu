@@ -10,7 +10,6 @@
     --bg: #fff6f9;
     --accent: #ff5c8a;
     --muted: #8b8b95;
-    --max-width: 720px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -27,7 +26,7 @@
 
   .wrap{
     width:100%;
-    max-width:var(--max-width);
+    max-width:720px;
     text-align:center;
   }
 
@@ -53,6 +52,7 @@
   }
   .cta:active{transform: translateY(2px)}
 
+  /* envelope area */
   .envelope-wrap{
     width:100%;
     max-width:460px;
@@ -60,45 +60,48 @@
     position: relative;
     display: grid;
     place-items: center;
-    min-height: 520px;
+    min-height: 560px;
   }
 
   .envelope{
     width: 96%;
     background: linear-gradient(180deg,#fff,#fff6fb);
     border-radius:16px;
-    padding-top: 110px;
+    padding-top: 160px;    /* increased to match bigger flap */
     padding-bottom: 36px;
     box-shadow: 0 18px 40px rgba(0,0,0,0.08);
     position: relative;
     overflow: visible;
+    transition: transform .45s ease;
   }
 
+  /* BIG dark-pink flap */
   .flap{
     width: 92%;
-    height: 110px;
+    height: 150px;            /* BIGGER FLAP */
     position: absolute;
     left: 4%;
     top: 0;
     transform-origin: center top;
-    background: linear-gradient(180deg,#ff2e78,#e4005e);
-    border-bottom-left-radius:18px;
-    border-bottom-right-radius:18px;
-    box-shadow: 0 10px 24px rgba(228,0,94,0.25);
+    background: linear-gradient(180deg, #ff2e78, #e4005e); /* dark pink */
+    border-bottom-left-radius:20px;
+    border-bottom-right-radius:20px;
+    box-shadow: 0 12px 28px rgba(228,0,94,0.25);
     transform: rotateX(0deg);
-    transition: transform .75s cubic-bezier(.2,.9,.3,1);
+    transition: transform .85s cubic-bezier(.2,.9,.3,1);
     display:grid;
     place-items:center;
   }
   .seal{
-    width:60px; height:60px; border-radius:50%;
-    background: linear-gradient(180deg,#ff6b93,#ff2d6f);
+    width:66px; height:66px; border-radius:50%;
+    background: linear-gradient(180deg,#ff4b90,#d9005d);
     color:white; font-weight:900; display:grid; place-items:center;
-    position:absolute; right:18px; top:14px; box-shadow:0 10px 18px rgba(255,92,138,0.12);
+    position:absolute; right:24px; top:22px; box-shadow:0 12px 22px rgba(0,0,0,0.08);
     transform: rotate(-8deg);
-    font-size:16px;
+    font-size:18px;
   }
 
+  /* letter (keeps inside envelope) */
   .letter{
     width: 90%;
     margin: 0 auto;
@@ -123,17 +126,50 @@
     font-weight:900;
   }
 
+  /* particles layer */
+  .particles {
+    pointer-events:none;
+    position:absolute;
+    inset:0;
+    overflow:visible;
+  }
+
+  /* particle style (emoji spans) */
+  .p {
+    position:absolute;
+    will-change: transform, opacity;
+    font-size:18px;
+    opacity:0;
+    transform: translateY(0) scale(0.9);
+    animation: floatUp 1800ms linear forwards;
+    text-shadow: 0 6px 14px rgba(0,0,0,0.12);
+  }
+
+  /* music notes slightly different */
+  .music { font-size:20px; }
+
+  /* floatUp keyframes */
+  @keyframes floatUp {
+    0% { transform: translateY(0) scale(0.9); opacity: 0; filter: blur(0px); }
+    10% { opacity:1; transform: translateY(-18px) scale(1); }
+    60% { transform: translateY(-160px) rotate(-10deg) scale(1.05); opacity:0.95; }
+    100% { transform: translateY(-300px) rotate(10deg) scale(1.1); opacity:0; }
+  }
+
+  /* open state */
   .open .flap{ transform: rotateX(-160deg); box-shadow: none; }
   .open .letter{ transform: translateY(0) scale(1); opacity:1; }
 
+  /* responsive tweaks */
   @media (max-width:420px){
-    .envelope-wrap{min-height:480px}
-    .envelope{padding-top:96px}
-    .flap{height:96px}
+    .envelope-wrap{min-height:500px}
+    .envelope{padding-top:140px}
+    .flap{height:130px}
+    .seal{right:16px; top:14px; width:54px; height:54px; font-size:15px}
     .letter{padding:20px; font-size:17px; line-height:1.65}
-    .seal{width:52px; height:52px; right:12px; top:10px; font-size:14px}
     .title{font-size:20px}
   }
+
 </style>
 </head>
 <body>
@@ -141,15 +177,15 @@
     <div id="pageTitle" class="title">For Kuttuu — Open your letter</div>
     <div class="subtitle">A little surprise, just for you 💞</div>
 
-    <button id="revealBtn" class="cta">Show Letter</button>
+    <button id="revealBtn" class="cta" aria-expanded="false">Show Letter</button>
 
-    <div class="envelope-wrap">
-      <div id="envelope" class="envelope">
-        <div class="flap">
+    <div class="envelope-wrap" aria-live="polite" aria-atomic="true">
+      <div id="envelope" class="envelope" role="img" aria-label="Envelope">
+        <div class="flap" aria-hidden="true">
           <div class="seal">XOX</div>
         </div>
 
-        <div id="letter" class="letter">
+        <div id="letter" class="letter" role="article" aria-hidden="true">
           <h3>To my Kuttuu 💖</h3>
 
 Heyyyyy kuttttuuuu,
@@ -159,6 +195,9 @@ Ummmmaaaaaaaaaa😘😘😘😘😘😘
 
                      your everything
         </div>
+
+        <!-- particles layer sits inside envelope-wrap -->
+        <div id="particles" class="particles" aria-hidden="true"></div>
       </div>
     </div>
   </div>
@@ -167,28 +206,78 @@ Ummmmaaaaaaaaaa😘😘😘😘😘😘
   const btn = document.getElementById('revealBtn');
   const envelope = document.getElementById('envelope');
   const letter = document.getElementById('letter');
+  const particles = document.getElementById('particles');
 
   let opened = false;
+
+  // Utility to spawn particles (emoji) with random positions
+  function spawnParticles(list, count=12, delayBetween=40) {
+    // list: array of emoji strings
+    for(let i=0;i<count;i++){
+      setTimeout(()=>{
+        const el = document.createElement('span');
+        el.className = 'p';
+        // slightly vary sizes
+        const size = 16 + Math.round(Math.random()*18);
+        el.style.fontSize = size + 'px';
+        // start X within envelope area
+        const x = 8 + Math.random()*84; // percent
+        el.style.left = x + '%';
+        // start near the flap area
+        el.style.bottom = '10%';
+        // random rotation
+        el.style.transform = `translateY(0) rotate(${(Math.random()*40)-20}deg) scale(${0.9 + Math.random()*0.4})`;
+        el.textContent = list[Math.floor(Math.random()*list.length)];
+        // small random animation duration & delay to vary movement
+        const dur = 1400 + Math.round(Math.random()*900);
+        el.style.animation = `floatUp ${dur}ms cubic-bezier(.2,.9,.3,1) forwards`;
+        particles.appendChild(el);
+        // cleanup after animation
+        setTimeout(()=> el.remove(), dur + 220);
+      }, i * delayBetween);
+    }
+  }
 
   btn.addEventListener('click', () => {
     opened = !opened;
     if(opened){
       envelope.classList.add('open');
       btn.textContent = 'Close Letter';
+      btn.setAttribute('aria-expanded','true');
+      letter.setAttribute('aria-hidden','false');
 
-      setTimeout(()=>{
-        letter.scrollIntoView({behavior:'smooth', block:'center'});
-      }, 380);
+      // spawn hearts + kisses
+      spawnParticles(['❤','💖','💞','😘','💋'], 14, 60);
+
+      // ensure letter is visible and centered
+      setTimeout(()=> letter.scrollIntoView({behavior:'smooth', block:'center'}), 420);
+
     } else {
       envelope.classList.remove('open');
       btn.textContent = 'Show Letter';
-      window.scrollTo({top:0, behavior:'smooth'});
+      btn.setAttribute('aria-expanded','false');
+      letter.setAttribute('aria-hidden','true');
+
+      // spawn music notation particles on close
+      spawnParticles(['♪','♫','♬','♩'], 12, 60);
+
+      // scroll top after short delay
+      setTimeout(()=> window.scrollTo({top:0, behavior:'smooth'}), 420);
     }
   });
 
+  // clicking envelope toggles, but if clicked inside text after open, ignore
   envelope.addEventListener('click', (e)=>{
     if(opened && e.target.closest('.letter')) return;
     btn.click();
+  });
+
+  // accessibility: open with Enter / Space when focused
+  btn.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
   });
 </script>
 </body>
