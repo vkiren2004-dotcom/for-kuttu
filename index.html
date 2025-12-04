@@ -134,26 +134,21 @@
     overflow:visible;
   }
 
-  /* particle style (emoji spans) */
+  /* particle base */
   .p {
     position:absolute;
     will-change: transform, opacity;
     font-size:18px;
     opacity:0;
-    transform: translateY(0) scale(0.9);
-    animation: floatUp 1800ms linear forwards;
+    transform: translate(0,0) scale(0.9);
     text-shadow: 0 6px 14px rgba(0,0,0,0.12);
   }
 
-  /* music notes slightly different */
-  .music { font-size:20px; }
-
-  /* floatUp keyframes */
-  @keyframes floatUp {
-    0% { transform: translateY(0) scale(0.9); opacity: 0; filter: blur(0px); }
-    10% { opacity:1; transform: translateY(-18px) scale(1); }
-    60% { transform: translateY(-160px) rotate(-10deg) scale(1.05); opacity:0.95; }
-    100% { transform: translateY(-300px) rotate(10deg) scale(1.1); opacity:0; }
+  /* floating keyframes using css vars for direction */
+  @keyframes flyAway {
+    0% { transform: translate(0px,0px) scale(0.95); opacity: 1; filter: blur(0px); }
+    70% { opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; }
   }
 
   /* open state */
@@ -169,7 +164,6 @@
     .letter{padding:20px; font-size:17px; line-height:1.65}
     .title{font-size:20px}
   }
-
 </style>
 </head>
 <body>
@@ -179,7 +173,7 @@
 
     <button id="revealBtn" class="cta" aria-expanded="false">Show Letter</button>
 
-    <div class="envelope-wrap" aria-live="polite" aria-atomic="true">
+    <div class="envelope-wrap" id="envwrap" aria-live="polite" aria-atomic="true">
       <div id="envelope" class="envelope" role="img" aria-label="Envelope">
         <div class="flap" aria-hidden="true">
           <div class="seal">XOX</div>
@@ -196,7 +190,7 @@ Ummmmaaaaaaaaaa😘😘😘😘😘😘
                      your everything
         </div>
 
-        <!-- particles layer sits inside envelope-wrap -->
+        <!-- particles layer sits inside envelope-wrap, covers whole area -->
         <div id="particles" class="particles" aria-hidden="true"></div>
       </div>
     </div>
@@ -207,49 +201,115 @@ Ummmmaaaaaaaaaa😘😘😘😘😘😘
   const envelope = document.getElementById('envelope');
   const letter = document.getElementById('letter');
   const particles = document.getElementById('particles');
+  const envwrap = document.getElementById('envwrap');
 
   let opened = false;
 
-  // Utility to spawn particles (emoji) with random positions
-  function spawnParticles(list, count=12, delayBetween=40) {
-    // list: array of emoji strings
-    for(let i=0;i<count;i++){
-      setTimeout(()=>{
-        const el = document.createElement('span');
-        el.className = 'p';
-        // slightly vary sizes
-        const size = 16 + Math.round(Math.random()*18);
-        el.style.fontSize = size + 'px';
-        // start X within envelope area
-        const x = 8 + Math.random()*84; // percent
-        el.style.left = x + '%';
-        // start near the flap area
-        el.style.bottom = '10%';
-        // random rotation
-        el.style.transform = `translateY(0) rotate(${(Math.random()*40)-20}deg) scale(${0.9 + Math.random()*0.4})`;
-        el.textContent = list[Math.floor(Math.random()*list.length)];
-        // small random animation duration & delay to vary movement
-        const dur = 1400 + Math.round(Math.random()*900);
-        el.style.animation = `floatUp ${dur}ms cubic-bezier(.2,.9,.3,1) forwards`;
-        particles.appendChild(el);
-        // cleanup after animation
-        setTimeout(()=> el.remove(), dur + 220);
-      }, i * delayBetween);
+  // Utility: return bounding box of envelope-wrap to place particles absolutely relative to it
+  function envRect() {
+    return envwrap.getBoundingClientRect();
+  }
+
+  // spawnParticles: spawns emoji particles from various edges and center, moving outward
+  // args: array of emojis, count, speedRange (ms)
+  function spawnParticles(emojis, count = 16, speedMin = 1200, speedMax = 2200) {
+    const rect = envRect();
+    for (let i = 0; i < count; i++) {
+      (function(i){
+        setTimeout(() => {
+          const el = document.createElement('span');
+          el.className = 'p';
+          // choose a random edge or center
+          const edges = ['top','bottom','left','right','center'];
+          const edge = edges[Math.floor(Math.random()*edges.length)];
+
+          // random size
+          const size = 14 + Math.round(Math.random()*20);
+          el.style.fontSize = size + 'px';
+
+          // position and dx/dy targets
+          let startX, startY, dx, dy;
+          const spread = 160 + Math.random()*220; // how far particle will travel
+
+          if (edge === 'top') {
+            startX = Math.random() * rect.width;
+            startY = Math.random() * 0.12 * rect.height; // near top
+            dx = (Math.random()-0.5) * (spread*1.2);
+            dy = - (spread + Math.random()*120);
+          } else if (edge === 'bottom') {
+            startX = Math.random() * rect.width;
+            startY = rect.height - Math.random() * 0.08 * rect.height; // near bottom
+            dx = (Math.random()-0.5) * (spread*1.2);
+            dy = (spread + Math.random()*120);
+          } else if (edge === 'left') {
+            startX = Math.random() * 0.08 * rect.width;
+            startY = Math.random() * rect.height;
+            dx = - (spread + Math.random()*140);
+            dy = (Math.random()-0.5) * (spread*0.9);
+          } else if (edge === 'right') {
+            startX = rect.width - Math.random() * 0.08 * rect.width;
+            startY = Math.random() * rect.height;
+            dx = (spread + Math.random()*140);
+            dy = (Math.random()-0.5) * (spread*0.9);
+          } else { // center
+            startX = rect.width * (0.25 + Math.random()*0.5);
+            startY = rect.height * (0.25 + Math.random()*0.5);
+            dx = (Math.random()-0.5) * (spread*1.4);
+            dy = (Math.random()-0.5) * (spread*1.4);
+          }
+
+          // convert startX,startY to percentage within particles container
+          const leftPerc = (startX / rect.width) * 100;
+          const topPerc = (startY / rect.height) * 100;
+          el.style.left = leftPerc + '%';
+          el.style.top = topPerc + '%';
+
+          // set CSS variables for animation target (px)
+          // round for less fractional pixels
+          el.style.setProperty('--dx', Math.round(dx) + 'px');
+          el.style.setProperty('--dy', Math.round(dy) + 'px');
+          // random rotation
+          el.style.setProperty('--rot', (Math.round((Math.random()*60)-30) + 'deg'));
+
+          // set emoji
+          el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+
+          // random animation duration
+          const dur = speedMin + Math.round(Math.random()*(speedMax - speedMin));
+          el.style.animation = `flyAway ${dur}ms cubic-bezier(.2,.9,.3,1) forwards`;
+
+          // slight random delay and small fade-in using opacity
+          el.style.opacity = '0';
+          particles.appendChild(el);
+
+          // fade-in quickly then let CSS animation handle movement
+          requestAnimationFrame(()=> {
+            el.style.transition = 'opacity 140ms ease';
+            el.style.opacity = '1';
+          });
+
+          // remove after animation finishes
+          setTimeout(()=> {
+            el.remove();
+          }, dur + 220);
+
+        }, i * (30 + Math.random()*80)); // stagger spawn slightly
+      })(i);
     }
   }
 
   btn.addEventListener('click', () => {
     opened = !opened;
-    if(opened){
+    if (opened) {
       envelope.classList.add('open');
       btn.textContent = 'Close Letter';
       btn.setAttribute('aria-expanded','true');
       letter.setAttribute('aria-hidden','false');
 
-      // spawn hearts + kisses
-      spawnParticles(['❤','💖','💞','😘','💋'], 14, 60);
+      // spawn hearts + kisses from all around
+      spawnParticles(['❤','💖','💞','😘','💋'], 20, 1200, 2400);
 
-      // ensure letter is visible and centered
+      // center letter into view
       setTimeout(()=> letter.scrollIntoView({behavior:'smooth', block:'center'}), 420);
 
     } else {
@@ -258,26 +318,31 @@ Ummmmaaaaaaaaaa😘😘😘😘😘😘
       btn.setAttribute('aria-expanded','false');
       letter.setAttribute('aria-hidden','true');
 
-      // spawn music notation particles on close
-      spawnParticles(['♪','♫','♬','♩'], 12, 60);
+      // spawn music notation particles from all sides
+      spawnParticles(['♪','♫','♬','♩'], 18, 1200, 2400);
 
       // scroll top after short delay
       setTimeout(()=> window.scrollTo({top:0, behavior:'smooth'}), 420);
     }
   });
 
-  // clicking envelope toggles, but if clicked inside text after open, ignore
+  // clicking envelope toggles but ignore clicks inside letter when opened
   envelope.addEventListener('click', (e)=>{
-    if(opened && e.target.closest('.letter')) return;
+    if (opened && e.target.closest('.letter')) return;
     btn.click();
   });
 
-  // accessibility: open with Enter / Space when focused
+  // accessibility: keyboard activate
   btn.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       btn.click();
     }
+  });
+
+  // keep particles container size synced (in case of orientation change)
+  window.addEventListener('resize', ()=> {
+    // no-op here, envRect reads up-to-date sizes
   });
 </script>
 </body>
