@@ -9,8 +9,8 @@
   :root{
     --bg: #fff6f9;
     --accent: #ff5c8a;
-    --card: #fff;
     --muted: #8b8b95;
+    --max-width: 720px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -19,180 +19,145 @@
     font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     background: linear-gradient(180deg, #fff9fb 0%, var(--bg) 100%);
     display:flex;
-    align-items:center;
+    align-items:flex-start;
     justify-content:center;
-    padding:28px;
+    padding:20px 14px;
     color:#222;
   }
 
   .wrap{
     width:100%;
-    max-width:980px;
+    max-width:var(--max-width);
     text-align:center;
   }
 
-  .header{
-    display:flex;
-    gap:16px;
-    align-items:center;
-    justify-content:center;
-    margin-bottom:22px;
-    flex-direction:column;
-  }
   .title{
-    font-size:28px;
+    font-size:22px;
     font-weight:800;
-    letter-spacing:-0.02em;
+    margin:12px 0 6px;
   }
-  .subtitle{color:var(--muted); margin-top:6px}
+  .subtitle{color:var(--muted); margin-bottom:6px; font-size:14px;}
 
-  .stage{
-    margin-top:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:28px;
-  }
-
-  /* button */
   .cta{
     background: linear-gradient(180deg,var(--accent), #ff2d6f);
     color:white;
     border:none;
-    padding:12px 22px;
+    padding:12px 20px;
     border-radius:999px;
-    font-weight:700;
+    font-weight:800;
     font-size:16px;
-    box-shadow: 0 10px 30px rgba(255,92,138,0.18);
+    box-shadow: 0 12px 30px rgba(255,92,138,0.14);
     cursor:pointer;
-    transition: transform .16s, opacity .2s;
+    transition: transform .12s, opacity .15s;
+    margin-top:8px;
   }
   .cta:active{transform: translateY(2px)}
-  .cta.hidden{opacity:0; pointer-events:none; transform: scale(.98)}
 
-  /* envelope container */
   .envelope-wrap{
-    width: 100%;
-    max-width: 900px;
-    height: auto;         /* allow it to grow */
-    min-height: 750px;    /* very big area */
+    width:100%;
+    max-width:460px;
+    margin:18px auto 0;
     position: relative;
-    margin: 40px auto 0;
     display: grid;
     place-items: center;
-}
+    min-height: 520px;
+  }
 
-
-  /* envelope */
- .envelope{
-    width: 95%;
-    height: auto;         /* allow letter to expand naturally */
-    background: #fff;
-    border-radius: 18px;
-    padding-top: 120px;   /* space for the flap */
-    padding-bottom: 40px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.10);
+  .envelope{
+    width: 96%;
+    background: linear-gradient(180deg,#fff,#fff6fb);
+    border-radius:16px;
+    padding-top: 110px;
+    padding-bottom: 36px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.08);
     position: relative;
-    overflow: visible;    /* IMPORTANT */
-}
+    overflow: visible;
+  }
 
-
-  /* top flap */
   .flap{
-    width:100%;
-    height:140%;
-    position:absolute;
-    left:0;
-    top:0;
+    width: 92%;
+    height: 110px;
+    position: absolute;
+    left: 4%;
+    top: 0;
     transform-origin: center top;
     background: linear-gradient(180deg,#ffeff6,#fff6fb);
-    border-bottom-left-radius:20px;
-    border-bottom-right-radius:20px;
-    box-shadow: 0 12px 24px rgba(255,92,138,0.06);
+    border-bottom-left-radius:18px;
+    border-bottom-right-radius:18px;
+    box-shadow: 0 8px 20px rgba(255,92,138,0.06);
     transform: rotateX(0deg);
-    transition: transform .8s cubic-bezier(.2,.9,.3,1);
+    transition: transform .75s cubic-bezier(.2,.9,.3,1);
     display:grid;
     place-items:center;
   }
   .seal{
-    width:64px; height:64px; border-radius:50%;
+    width:60px; height:60px; border-radius:50%;
     background: linear-gradient(180deg,#ff6b93,#ff2d6f);
-    color:white; font-weight:800; display:grid; place-items:center;
-    position:absolute; right:18px; top:8px; box-shadow:0 10px 20px rgba(255,92,138,0.14);
+    color:white; font-weight:900; display:grid; place-items:center;
+    position:absolute; right:18px; top:14px; box-shadow:0 10px 18px rgba(255,92,138,0.12);
     transform: rotate(-8deg);
+    font-size:16px;
   }
 
-  /* letter */
- .letter{
-    position: relative;
-    background: #fff;
-    padding: 40px;
+  .letter{
     width: 90%;
     margin: 0 auto;
-
-    border-radius: 14px;
-
-    font-size: 21px;      /* BIGGER TEXT */
-    line-height: 1.75;
-    color: #222;
-
-    box-shadow: 0 18px 45px rgba(0,0,0,0.08);
-
-    transform: translateY(40px) scale(0.98);
+    position: relative;
+    background: #fff;
+    padding: 26px 20px;
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(10,10,20,0.05);
+    transform: translateY(48px) scale(0.995);
     opacity: 0;
-    transition: transform .7s cubic-bezier(.2,.9,.3,1), opacity .6s;
-
-    max-height: none;     /* unlimited height */
-    overflow: visible;    /* REMOVE scrollbar */
-}
-
-
-  .letter h3{
-    margin:0 0 10px 0;
-    font-size:20px;
-    font-weight:800;
+    transition: transform .6s cubic-bezier(.2,.9,.3,1), opacity .45s;
+    text-align:left;
+    white-space: pre-wrap;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #222;
   }
 
-  /* when open */
-  .open .flap{ transform: rotateX(-160deg); box-shadow: none; }
-  .open .letter{ transform: translateY(-10%) scale(1); opacity:1; }
+  .letter h3{
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    font-weight:900;
+  }
 
-  /* small mobile tweak */
-  @media (max-width:520px){
-    .title{font-size:22px}
-    .letter{font-size:15px}
-    .envelope-wrap{height:280px}
+  .open .flap{ transform: rotateX(-160deg); box-shadow: none; }
+  .open .letter{ transform: translateY(0) scale(1); opacity:1; }
+
+  @media (max-width:420px){
+    .envelope-wrap{min-height:480px}
+    .envelope{padding-top:96px}
+    .flap{height:96px}
+    .letter{padding:20px; font-size:17px; line-height:1.65}
+    .seal{width:52px; height:52px; right:12px; top:10px; font-size:14px}
+    .title{font-size:20px}
   }
 </style>
 </head>
 <body>
   <div class="wrap" role="main" aria-labelledby="pageTitle">
-    <header class="header">
-      <div class="title" id="pageTitle">For Kuttuu — Open your letter</div>
-      <div class="subtitle">A little surprise, just for you 💞</div>
-    </header>
+    <div id="pageTitle" class="title">For Kuttuu — Open your letter</div>
+    <div class="subtitle">A little surprise, just for you 💞</div>
 
-    <div class="stage">
-      <div>
-        <button id="revealBtn" class="cta" aria-controls="envelope" aria-expanded="false">Show Letter</button>
+    <button id="revealBtn" class="cta">Show Letter</button>
 
-        <div class="envelope-wrap" style="display:block" aria-live="polite" aria-atomic="true">
-          <div id="envelope" class="envelope" role="img" aria-label="Envelope">
-            <div class="flap" aria-hidden="true">
-              <div class="seal">XOX</div>
-            </div>
+    <div class="envelope-wrap">
+      <div id="envelope" class="envelope">
+        <div class="flap">
+          <div class="seal">XOX</div>
+        </div>
 
-            <div id="letter" class="letter" role="article" aria-hidden="true">
-              <h3>To my Kuttuu 💖</h3>
+        <div id="letter" class="letter">
+          <h3>To my Kuttuu 💖</h3>
 
 Heyyyyy kuttttuuuu,
 I never wrote any love letter but, now I'm gonna write a letter for the first time specially for you dudduuuu. You know I always dreamed of having a girl who is so caring and loving towards me as well as towards my parents. One who understands me, one who supports me and one who is a musician too🫣. I used to day dream to have a girl like this and moreover when I used to see insta reels anol i used to see musician couples 🫣🥹 soooo.....I always wanted someone in my lifeee🥺. You know all my past stories from me proposing to cheating in me, every single thing you know about me. I don't know how I was after all these things and I decided that I won't go behind love and all such things after that. Meeting you was totally unexpected. I never thought I would meet someone in my life. Soo...you messaged me in insta for the first time in December 2023,so appoo I had no expectations. Then you started messaging me like audio notes of you composing and singing songs and koravis.This year changed everything. At the start of this year I had the heartbreak of cheating on me and now you healed my heart. Kuttuuu🥹I don't know what I did to get you. You showed me so much care even though we were friends at the beginning and that made me fall for you. You were so different from anyone 🥹💞💞. The amount of respect you gave me and the care you gave me is something that I had always dreamed of in my life. The amount of understanding you have is sooo soo 🥹🤌🏻✨💞🥰. You know the maturity of both of us is the same because girls get maturity faster then boys because of that only arranged marriages always have an age gap of 4 to 5 years. I am soooooo lucky to get you kutttuu🥹🥹💞🫂😘. I got what i dreamed and now my next dream is to marry and live with you peacefully. I don't want a luxury materialistic life but a cute, simple life with you with a lot of love and care. You will achieve what you dreamed of kutttuuu and I promise you that I will always support you ♾️💞💗. Thank you everything kutttuu and thank youu for believing me. I truly love you a lot💞🥹🫂♾️💗🧿 and moving on next year with the same love and care kuttuuu🥹💞♾️💗🧿.
 I Loveee youu muthaeeeee 🥹💞♾️🧿🧿🫂
 Ummmmaaaaaaaaaa😘😘😘😘😘😘
 
-                                                             your everything
-            </div>
-          </div>
+                     your everything
         </div>
       </div>
     </div>
@@ -210,21 +175,19 @@ Ummmmaaaaaaaaaa😘😘😘😘😘😘
     if(opened){
       envelope.classList.add('open');
       btn.textContent = 'Close Letter';
-      btn.setAttribute('aria-expanded','true');
-      letter.setAttribute('aria-hidden','false');
+
+      setTimeout(()=>{
+        letter.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 380);
     } else {
       envelope.classList.remove('open');
       btn.textContent = 'Show Letter';
-      btn.setAttribute('aria-expanded','false');
-      letter.setAttribute('aria-hidden','true');
+      window.scrollTo({top:0, behavior:'smooth'});
     }
   });
 
-  // optional: open on first visit (comment out if not desired)
-  // window.addEventListener('load', ()=> { btn.click(); });
-
-  // Make sure clicking envelope also toggles
-  envelope.addEventListener('click', ()=> {
+  envelope.addEventListener('click', (e)=>{
+    if(opened && e.target.closest('.letter')) return;
     btn.click();
   });
 </script>
