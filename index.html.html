@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>For Kuttuu — Envelope Surprise 💌</title>
+<style>
+  :root{
+    --bg:#fff6fb; --accent:#ff3f76; --muted:#6b6b72;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,#fff7fb 0%, #fff0f6 60%);
+    display:flex; align-items:center; justify-content:center; padding:24px; color:#222;
+  }
+  .container{width:100%; max-width:980px; border-radius:18px; padding:28px; position:relative; background:transparent}
+  .topbar{display:flex; align-items:center; gap:16px; margin-bottom:18px}
+  .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,var(--accent),#ff1f5f);display:grid;place-items:center;color:white;font-size:28px;box-shadow:0 12px 36px rgba(255,60,120,0.12)}
+  h1{margin:0;font-size:22px}
+  .controls{margin-left:auto;display:flex;gap:10px}
+  button{cursor:pointer;border:0;padding:10px 14px;border-radius:12px;font-weight:700;background:var(--accent);color:#fff;box-shadow:0 8px 24px rgba(255,64,120,0.12);transition:transform .12s ease}
+  button.ghost{background:transparent;color:var(--accent);border:2px solid rgba(255,64,120,0.12);box-shadow:none}
+  button:active{transform:translateY(2px)}
+  .stage{display:flex;gap:28px;align-items:flex-start}
+  .left{flex:1}
+  .card{background:rgba(255,255,255,0.9);padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.04)}
+  textarea{width:100%;min-height:160px;padding:10px;border-radius:8px;border:1px solid #eee;font-size:15px}
+  .small{font-size:13px;color:var(--muted)}
+  /* Envelope area - realistic */
+  .env-wrap{width:420px;height:320px;display:grid;place-items:center;position:relative}
+  .envelope-3d{width:320px;height:220px;position:relative;perspective:1000px; }
+  /* back of envelope (body) */
+  .env-body{position:absolute;inset:0;background:linear-gradient(180deg,#fff,#fff7fa);border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,0.12);overflow:hidden;display:flex;align-items:center;justify-content:center;padding:18px;transform-style:preserve-3d}
+  /* flap */
+  .env-flap{position:absolute;left:0;right:0;top:-2px;height:120px;background:linear-gradient(180deg,#ffdfe9,#fff0f6);border-radius:10px;transform-origin:center top;transform:rotateX(0deg) translateY(0);box-shadow:0 12px 30px rgba(0,0,0,0.06);transition:transform 700ms cubic-bezier(.2,.9,.25,1)}
+  /* inner triangle detail */
+  .env-flap:before{content:'';position:absolute;left:50%;top:24px;width:0;height:0;border-left:160px solid transparent;border-right:160px solid transparent;border-top:80px solid rgba(255,255,255,0.06);transform:translateX(-50%);opacity:0.9}
+  /* seal */
+  .seal{position:absolute;right:18px;top:18px;width:60px;height:60px;border-radius:50%;background:linear-gradient(180deg,#ff6b93,#ff2d6f);display:grid;place-items:center;color:#fff;font-weight:800;transform:rotate(-6deg);box-shadow:0 12px 28px rgba(255,80,130,0.12);z-index:30}
+  /* letter paper: initially hidden inside envelope body */
+  .paper{width:84%;height:78%;background:linear-gradient(180deg,#fff,#fffdf8);border-radius:8px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,0.06);transform:translateY(46px);opacity:0;transition:transform 700ms cubic-bezier(.2,.9,.25,1),opacity 360ms ease;z-index:20;overflow:auto}
+  .paper.visible{transform:translateY(-10px);opacity:1}
+  .paper h2{margin:0 0 8px;font-size:18px}
+  .paper p{white-space:pre-wrap;line-height:1.6;margin:0;font-size:16px}
+  /* when flap is opened, rotateX -180deg to flip open */
+  .open .env-flap{transform:rotateX(-180deg) translateY(-6px)}
+  /* hearts */
+  .hearts{position:absolute;inset:0;pointer-events:none}
+  .heart{position:absolute;font-size:20px;opacity:0;transform:translateY(0);animation:floatHeart 3.6s ease forwards}
+  @keyframes floatHeart{0%{opacity:0;transform:translateY(0) scale(.8)}10%{opacity:1}100%{opacity:0;transform:translateY(-260px) scale(1.3)}}
+  /* music notes */
+  .music{position:absolute;inset:0;pointer-events:none}
+  .note{position:absolute;font-size:22px;opacity:0;animation:riseNote 2.8s ease forwards}
+  @keyframes riseNote{0%{opacity:0; transform:translateY(20px) scale(.8)}20%{opacity:1}100%{opacity:0; transform:translateY(-220px) scale(1.2) rotate(10deg)}}
+  /* responsive */
+  @media (max-width:820px){.stage{flex-direction:column-reverse}.env-wrap{width:100%} .envelope-3d{transform:scale(.95)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <div class="logo">❤</div>
+    <div>
+      <h1>For Kuttuu — Open your letter</h1>
+      <div class="small">A little surprise crafted with love 💞</div>
+    </div>
+    <div class="controls">
+      <button id="showBtn">Show Letter</button>
+      <button id="typeBtn" class="ghost">Type Out</button>
+      <button id="closeBtn" class="ghost">Close Letter</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="left">
+      <div class="card">
+        <strong>Letter editor</strong>
+        <div style="margin-top:8px" class="small">Edit the letter below and Save locally.</div>
+        <textarea id="editor">Heyyyyy kuttttuuuu,
+I never wrote any love letter but, now I'm gonna write a letter for the first time specially for you dudduuuu. You know I always dreamed of having a girl who is so caring and loving towards me as well as towards my parents. One who understands me, one who supports me and one who is a musician too🫣. I used to day dream to have a girl like this and moreover when I used to see insta reels anol i used to see musician couples 🫣🥹 soooo.....I always wanted someone in my lifeee🥺. You know all my past stories from me proposing to cheating in me, every single thing you know about me. I don't know how I was after all these things and I decided that I won't go behind love and all such things after that. Meeting you was totally unexpected. I never thought I would meet someone in my life. Soo...you messaged me in insta for the first time in December 2023,so appoo I had no expectations. Then you started messaging me like audio notes of you composing and singing songs and koravis.This year changed everything. At the start of this year I had the heartbreak of cheating on me and now you healed my heart. Kuttuuu🥹I don't know what I did to get you. You showed me so much care even though we were friends at the beginning and that made me fall for you. You were so different from anyone 🥹💞💞. The amount of respect you gave me and the care you gave me is something that I had always dreamed of in my life. The amount of understanding you have is sooo soo 🥹🤌🏻✨💞🥰. You know the maturity of both of us is the same because girls get maturity faster then boys because of that only arranged marriages always have an age gap of 4 to 5 years. I am soooooo lucky to get you kutttuu🥹🥹💞🫂😘. I got what i dreamed and now my next dream is to marry and live with you peacefully. I don't want a luxury materialistic life but a cute, simple life with you with a lot of love and care. You will achieve what you dreamed of kutttuuu and I promise you that I will always support you ♾️💞💗. Thank you everything kutttuu and thank youu for believing me. I truly love you a lot💞🥹🫂♾️💗🧿 and moving on next year with the same love and care kuttuuu🥹💞♾️💗🧿.
+I Loveee youu muthaeeeee 🥹💞♾️🧿🧿🫂
+Ummmmaaaaaaaaaa😘😘😘😘😘😘
+                                 
+                                                             your everything</textarea>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <button id="saveBtn">Save locally</button>
+          <button id="heartsBtn" class="ghost">More Hearts</button>
+          <div style="margin-left:auto" class="small">Saved in browser storage</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="env-wrap">
+      <div class="card" style="width:100%;height:100%;display:grid;place-items:center;position:relative;overflow:visible">
+        <div class="hearts" id="heartsLayer"></div>
+        <div class="music" id="musicLayer"></div>
+
+        <div class="envelope-3d" id="env3d" aria-hidden="false" role="img">
+          <div class="env-body" id="envBody">
+            <div class="env-flap" id="envFlap"></div>
+            <div class="seal">XOX</div>
+            <div class="paper" id="paper">
+              <h2>To my Kuttuu 💖</h2>
+              <p id="paperText"></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const env3d = document.getElementById('env3d');
+const envFlap = document.getElementById('envFlap');
+const paper = document.getElementById('paper');
+const paperText = document.getElementById('paperText');
+const editor = document.getElementById('editor');
+const showBtn = document.getElementById('showBtn');
+const typeBtn = document.getElementById('typeBtn');
+const closeBtn = document.getElementById('closeBtn');
+const saveBtn = document.getElementById('saveBtn');
+const heartsBtn = document.getElementById('heartsBtn');
+const heartsLayer = document.getElementById('heartsLayer');
+const musicLayer = document.getElementById('musicLayer');
+
+// Local storage key
+const KEY = 'for_kuttuu_letter_v3';
+const saved = localStorage.getItem(KEY);
+if(saved) editor.value = saved;
+
+// heart spawn
+function spawnHearts(n=8){
+  for(let i=0;i<n;i++){
+    const el = document.createElement('div');
+    el.className = 'heart';
+    el.style.left = (8 + Math.random()*84) + '%';
+    el.style.bottom = (10 + Math.random()*30) + 'px';
+    el.style.fontSize = (14 + Math.random()*30) + 'px';
+    el.textContent = '❤';
+    el.style.animationDelay = (Math.random()*0.9) + 's';
+    heartsLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 4200 + Math.random()*1200);
+  }
+}
+
+// music symbols
+function spawnNotes(n=8){
+  const symbols = ['♪','♫','♬','🎵'];
+  for(let i=0;i<n;i++){
+    const el = document.createElement('div');
+    el.className = 'note';
+    el.style.left = (6 + Math.random()*86) + '%';
+    el.style.bottom = (18 + Math.random()*40) + 'px';
+    el.style.fontSize = (16 + Math.random()*36) + 'px';
+    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    el.style.animationDelay = (Math.random()*0.6) + 's';
+    musicLayer.appendChild(el);
+    setTimeout(()=> el.remove(), 3200 + Math.random()*1000);
+  }
+}
+
+// play short melody
+function playMelody(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    const notes = [440, 523.25, 659.25, 880, 659.25,523.25]; // melody
+    let t = 0;
+    for(let i=0;i<notes.length;i++){
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(notes[i], now + t);
+      g.gain.setValueAtTime(0, now + t);
+      g.gain.linearRampToValueAtTime(0.14, now + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + 0.28);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now + t);
+      o.stop(now + t + 0.34);
+      t += 0.34;
+    }
+  }catch(e){ console.log('audio error', e) }
+}
+
+// open with animation (either instant or type)
+function openEnvelope(mode='instant'){
+  document.getElementById('env3d').classList.add('open'); // for CSS
+  // rotate flap
+  envFlap.style.transform = 'rotateX(-180deg) translateY(-6px)';
+  // reveal paper after flap moves
+  setTimeout(()=>{
+    paper.classList.add('visible');
+    spawnHearts(10);
+    if(mode==='type') typeWriter(paperText, editor.value);
+    else paperText.textContent = editor.value;
+  }, 420);
+}
+
+// close envelope and play notes
+function closeEnvelope(){
+  paper.classList.remove('visible');
+  setTimeout(()=>{
+    envFlap.style.transform = 'rotateX(0deg) translateY(0)';
+    document.getElementById('env3d').classList.remove('open');
+    spawnNotes(12);
+    playMelody();
+  }, 280);
+}
+
+// typing effect
+function typeWriter(el, text){
+  el.textContent = '';
+  el.parentElement.classList.add('typing');
+  let i=0;
+  function step(){
+    if(i<text.length){
+      el.textContent += text.charAt(i);
+      i++;
+      setTimeout(step, 18 + Math.random()*18);
+    } else {
+      el.parentElement.classList.remove('typing');
+    }
+  }
+  step();
+}
+
+// events
+showBtn.addEventListener('click', ()=> openEnvelope('instant'));
+typeBtn.addEventListener('click', ()=> openEnvelope('type'));
+closeBtn.addEventListener('click', ()=> closeEnvelope());
+heartsBtn.addEventListener('click', ()=> spawnHearts(20));
+saveBtn.addEventListener('click', ()=>{ localStorage.setItem(KEY, editor.value); saveBtn.textContent='Saved ✓'; setTimeout(()=> saveBtn.textContent='Save locally',900); });
+
+// also open by clicking envelope
+document.getElementById('env3d').addEventListener('click', ()=> openEnvelope('type'));
+
+// initial small hearts
+setTimeout(()=> spawnHearts(6), 700);
+</script>
+</body>
+</html>
